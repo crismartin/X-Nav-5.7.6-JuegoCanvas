@@ -34,6 +34,70 @@ princessImage.onload = function () {
 };
 princessImage.src = "images/princess.png";
 
+// stone1 image
+var stoneReady = false;
+var stoneImage = new Image();
+stoneImage.onload = function () {
+	stoneReady = true;
+};
+stoneImage.src = "images/stone.png";
+
+// stone2 image
+var stone2Ready = false;
+var stone2Image = new Image();
+stone2Image.onload = function () {
+	stone2Ready = true;
+};
+stone2Image.src = "images/stone.png";
+
+// stone3 image
+var stone3Ready = false;
+var stone3Image = new Image();
+stone3Image.onload = function () {
+	stone3Ready = true;
+};
+stone3Image.src = "images/stone.png";
+
+// stone4 image
+var stone4Ready = false;
+var stone4Image = new Image();
+stone4Image.onload = function () {
+	stone4Ready = true;
+};
+stone4Image.src = "images/stone.png";
+
+// stone5 image
+var stone5Ready = false;
+var stone5Image = new Image();
+stone5Image.onload = function () {
+	stone5Ready = true;
+};
+stone5Image.src = "images/stone.png";
+
+
+// mounstro1 image
+var mounstro1Ready = false;
+var mounstro1Image = new Image();
+mounstro1Image.onload = function () {
+	mounstro1Ready = true;
+};
+mounstro1Image.src = "images/monster.png";
+
+
+
+
+
+
+
+// posiciones de las piedras
+var pos_stone1 = {x:250,y:128,w:32,h:32};
+var pos_stone2 = {x:150,y:230,w:32,h:32};
+var pos_stone3 = {x:360,y:316,w:32,h:32};
+var pos_stone4 = {x:216,y:360,w:32,h:32};
+var pos_stone5 = {x:356,y:190,w:32,h:32};
+
+var obstaculos = [pos_stone1,pos_stone2,pos_stone3,pos_stone4, pos_stone5];
+
 // Game objects
 var hero = {
 	speed: 256 // movement in pixels per second
@@ -52,31 +116,116 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
+// limites de posicion para los objetos
+var limits = {x_pos: 194+(canvas.width / 2),
+			  x_neg: -226+(canvas.width / 2),
+			  y_pos: 170+(canvas.height / 2),
+			  y_neg: -215+(canvas.height / 2)};
+
+
 // Reset the game when the player catches a princess
 var reset = function () {
-	hero.x = canvas.width / 2;
-	hero.y = canvas.height / 2;
-
+	hero.x = (canvas.width / 2);
+	hero.y = (canvas.height / 2);
+	
 	// Throw the princess somewhere on the screen randomly
 	princess.x = 32 + (Math.random() * (canvas.width - 64));
-	princess.y = 32 + (Math.random() * (canvas.height - 64));
+	if(princess.x > limits.x_pos){
+		princess.x = limits.x_pos;
+	}	
+
+	for(i=0; i<obstaculos.length; i++){
+		if (colision(princess, obstaculos[i])){
+			princess.y = obstaculos[i].y + obstaculos[i].h +1
+		}
+	}
+
+	princess.y =  32+ (Math.random() * (canvas.height - 64));
+	if(princess.y > limits.y_pos){
+		princess.y = limits.y_pos;	
+	}
+
+	for(i=0; i<obstaculos.length; i++){
+		if (colision(princess, obstaculos[i])){
+			princess.x = obstaculos[i].x + obstaculos[i].w +1
+		}
+	}	
+	
 };
+
+
+function  colision(a,b) {
+	if(a.x <= (b.x + b.w)
+		&& b.x <= (a.x + 32)
+		&& a.y <= (b.y + b.h)
+		&& b.y <= (a.y + 32)){
+
+		return true;
+	}else{
+		return false;
+	}
+};
+
 
 // Update game objects
 var update = function (modifier) {
-	if (38 in keysDown) { // Player holding up
-		hero.y -= hero.speed * modifier;
+	if (38 in keysDown) { // Player holding up				
+		if(hero.y < limits.y_neg){
+			hero.y = limits.y_neg;						
+		}else{
+			hero.y -= hero.speed * modifier;
+		}	
+
+		for(i=0; i<obstaculos.length; i++){
+			if (colision(hero, obstaculos[i])){
+				hero.y = obstaculos[i].y + obstaculos[i].h +1
+			}
+		}
+		
 	}
 	if (40 in keysDown) { // Player holding down
-		hero.y += hero.speed * modifier;
+		if(hero.y > limits.y_pos){
+			hero.y = limits.y_pos;						
+		}else{
+			hero.y += hero.speed * modifier;
+		}
+
+		for(i=0; i<obstaculos.length; i++){
+			if (colision(hero, obstaculos[i])){
+				hero.y = obstaculos[i].y - 32 -1
+			}
+		}	
+
 	}
 	if (37 in keysDown) { // Player holding left
-		hero.x -= hero.speed * modifier;
+
+		if(hero.x < limits.x_neg){
+			hero.x = limits.x_neg;						
+		}else{
+			hero.x -= hero.speed * modifier;
+		}		
+
+		for(i=0; i<obstaculos.length; i++){
+			if (colision(hero, obstaculos[i])){
+				hero.x = obstaculos[i].x + obstaculos[i].w +1
+			}
+		}	
 	}
 	if (39 in keysDown) { // Player holding right
-		hero.x += hero.speed * modifier;
-	}
 
+		if(hero.x > limits.x_pos){
+			hero.x = limits.x_pos;						
+		}else{
+			hero.x += hero.speed * modifier;
+		}		
+
+		for(i=0; i<obstaculos.length; i++){
+			if (colision(hero, obstaculos[i])){
+				hero.x = obstaculos[i].x - 32 -1
+			}
+		}
+	}
+	
 	// Are they touching?
 	if (
 		hero.x <= (princess.x + 16)
@@ -102,6 +251,31 @@ var render = function () {
 	if (princessReady) {
 		ctx.drawImage(princessImage, princess.x, princess.y);
 	}
+
+	if (stoneReady) {
+		ctx.drawImage(stoneImage, pos_stone1.x, pos_stone1.y);
+	}
+
+	if (stone2Ready) {
+		ctx.drawImage(stone2Image, pos_stone2.x, pos_stone2.y);
+	}
+
+	if (stone3Ready) {
+		ctx.drawImage(stone3Image, pos_stone3.x, pos_stone3.y);
+	}
+	
+	if (stone4Ready) {
+		ctx.drawImage(stone4Image, pos_stone4.x, pos_stone4.y);
+	}
+
+	if (stone5Ready) {
+		ctx.drawImage(stone5Image, pos_stone5.x, pos_stone5.y);
+	}
+
+	if (mounstro1Ready) {
+		ctx.drawImage(mounstro1Image, 410, 120);
+	}
+
 
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
