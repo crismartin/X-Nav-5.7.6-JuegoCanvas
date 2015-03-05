@@ -349,7 +349,7 @@ var update = function (modifier) {
 	if (colision(hero, princess)) {
 		++princessesCaught;
 
-		if(princessesCaught == 3){
+		if(princessesCaught == 10){
 			nivel = 2;			
 			princessesCaught = 0;
 			speed_m = speed_m*3;
