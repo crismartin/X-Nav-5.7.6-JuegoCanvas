@@ -102,6 +102,25 @@ mounstro3Image.onload = function () {
 mounstro3Image.src = "images/monster.png";
 
 
+// mounstro4 image
+var mounstro4Ready = false;
+var mounstro4Image = new Image();
+mounstro4Image.onload = function () {
+	mounstro4Ready = true;
+};
+mounstro4Image.src = "images/monster.png";
+
+
+// mounstro5 image
+var mounstro5Ready = false;
+var mounstro5Image = new Image();
+mounstro5Image.onload = function () {
+	mounstro5Ready = true;
+};
+mounstro5Image.src = "images/monster.png";
+
+
+
 // ** Posiciones ** //
 // posiciones de las piedras
 var pos_stone1 = {x:250,y:128,w:32,h:32};
@@ -110,19 +129,26 @@ var pos_stone3 = {x:360,y:316,w:32,h:32};
 var pos_stone4 = {x:216,y:360,w:32,h:32};
 var pos_stone5 = {x:356,y:190,w:32,h:32};
 
-var pos_init_m1 = {x:410, y:120, w:32, h:32};
-var pos_init_m2 = {x:50, y:180, w:32, h:32};
-var pos_init_m3 = {x:canvas.width/2, y:400, w:32, h:32};
+var pos_init_m1 = {x:410, y:120};
+var pos_init_m2 = {x:50, y:180};
+var pos_init_m3 = {x:canvas.width/2, y:400};
+var pos_init_m4 = {x:100, y:400};
+var pos_init_m5 = {x:256, y:100};
+
 
 var obstaculos = [pos_stone1,pos_stone2,pos_stone3,pos_stone4, pos_stone5];
-var monsters = [monster, monster2, monster3];
+var monsters = [monster, monster2, monster3, monster4, monster5];
 
 // Game objects
 var hero = {
 	speed: 256 // movement in pixels per second
 };
-var princess = {};
+var princess = {
+	w: 16,
+	h: 16
+};
 var princessesCaught = 0;
+var speed_m = hero.speed;
 var nivel = 1;
 
 var monster = {	
@@ -142,6 +168,21 @@ var monster2 = {
 var monster3 = {	
 	x:pos_init_m3.x,
 	y:pos_init_m3.y,
+	w:32,
+	h:32
+};
+
+var monster4 = {	
+	x:pos_init_m4.x,
+	y:pos_init_m4.y,
+	w:32,
+	h:32
+};
+
+
+var monster5 = {	
+	x:pos_init_m5.x,
+	y:pos_init_m5.y,
 	w:32,
 	h:32
 };
@@ -178,6 +219,11 @@ var reset = function () {
 	initPosMonster(monster,pos_init_m1);
 	initPosMonster(monster2,pos_init_m2);
 	initPosMonster(monster3,pos_init_m3);
+
+	if(nivel == 2){
+		initPosMonster(monster4,pos_init_m4);
+		initPosMonster(monster5,pos_init_m5);
+	}
 	
 	// Throw the princess somewhere on the screen randomly
 	princess.x = 32 + (Math.random() * (canvas.width - 64));
@@ -219,15 +265,15 @@ function colision(a,b) {
 
 function moverMonster(mounstro, modifier){	
  	if(mounstro.x < hero.x){ 			
- 		mounstro.x += hero.speed * modifier/10;
+ 		mounstro.x += speed_m * modifier/10;
  	}else{ 			
- 		mounstro.x -= hero.speed * modifier/10;
+ 		mounstro.x -= speed_m * modifier/10;
  	}
  		
  	if(mounstro.y < hero.y){ 			
- 		mounstro.y += hero.speed * modifier/10;
+ 		mounstro.y += speed_m * modifier/10;
  	}else{ 			
- 		mounstro.y -= hero.speed * modifier/10;
+ 		mounstro.y -= speed_m * modifier/10;
  	} 	
 }
 
@@ -294,26 +340,35 @@ var update = function (modifier) {
 	moverMonster(monster2,modifier);
 	moverMonster(monster3,modifier);
 
+	if(nivel == 2){
+		moverMonster(monster4,modifier);
+		moverMonster(monster5,modifier);		
+	}
+
 	// Are they touching?
-	if (hero.x <= (princess.x + 16)
-		&& princess.x <= (hero.x + 16)
-		&& hero.y <= (princess.y + 16)
-		&& princess.y <= (hero.y + 32)
-	) {
+	if (colision(hero, princess)) {
 		++princessesCaught;
+
+		if(princessesCaught == 3){
+			nivel = 2;			
+			princessesCaught = 0;
+			speed_m = speed_m*3;
+		}
+		
 		reset();
 	}
 
 	if(colision(hero, monster) 
 		|| colision(hero, monster2)
 		|| colision(hero, monster3)
+		|| colision(hero, monster4)
+		|| colision(hero, monster5)
 	){
 		princessesCaught = 0;
 		reset();
 	}
 
 };
-
 
 
 // Draw everything
@@ -362,13 +417,24 @@ var render = function () {
 		ctx.drawImage(mounstro3Image, monster3.x, monster3.y);		
 	}
 
+	
+	if(nivel == 2){
+		if (mounstro4Ready) {
+			ctx.drawImage(mounstro4Image, monster4.x, monster4.y);		
+		}
+
+		if (mounstro5Ready) {
+			ctx.drawImage(mounstro5Image, monster5.x, monster5.y);		
+		}
+	}	
+
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
 	ctx.fillText("Princesses caught: " + princessesCaught, 32, 32);
-	ctx.fillText("Level " + nivel, 400, 32);
+	ctx.fillText("Level " + nivel , 400, 32);
 };
 
 // The main game loop
